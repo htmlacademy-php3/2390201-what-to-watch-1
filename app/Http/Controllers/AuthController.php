@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Responses\BaseResponce;
-use App\Http\Responses\FailResponce;
+use App\Http\Requests\UserRequest;
+use App\Http\Responses\BaseResponse;
+use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -22,9 +23,9 @@ class AuthController extends Controller
    * После сохранения в БД создаёт токен Sanctum и возвращает его клиенту.
    *
    * @param \Illuminate\Http\Request $request Входящий HTTP-запрос
-   * @return \App\Http\Responses\BaseResponce Ответ в формате JSON
+   * @return \App\Http\Responses\BaseResponse Ответ в формате JSON
    */
-  public function register(Request $request): BaseResponce
+  public function register(UserRequest $request): BaseResponse
   {
     try {
       $avatar = null;
@@ -54,7 +55,7 @@ class AuthController extends Controller
         ],
       ], 201);
     } catch (\Exception $e) {
-      return new FailResponce([], $e->getMessage());
+      return new FailResponse([], $e->getMessage());
     }
   }
 
@@ -66,9 +67,9 @@ class AuthController extends Controller
    * "Неверное имя пользователя или пароль."
    *
    * @param \Illuminate\Http\Request $request Входящий HTTP-запрос
-   * @return \App\Http\Responses\BaseResponce Ответ в формате JSON
+   * @return \App\Http\Responses\BaseResponse Ответ в формате JSON
    */
-  public function login(Request $request): BaseResponce
+  public function login(Request $request): BaseResponse
   {
     try {
       $credentials = [
@@ -78,7 +79,7 @@ class AuthController extends Controller
 
       // Попытка аутентификации
       if (!Auth::attempt($credentials)) {
-        return new FailResponce(
+        return new FailResponse(
           ['exception' => ['Неверное имя пользователя или пароль.']],
           'Неверное имя пользователя или пароль.',
           422
@@ -93,7 +94,7 @@ class AuthController extends Controller
         'token' => $token,
       ]);
     } catch (\Exception $e) {
-      return new FailResponce([], $e->getMessage());
+      return new FailResponse([], $e->getMessage());
     }
   }
 
@@ -104,15 +105,15 @@ class AuthController extends Controller
    * Требует авторизации (middleware auth:sanctum).
    *
    * @param \Illuminate\Http\Request $request Входящий HTTP-запрос
-   * @return \App\Http\Responses\BaseResponce Ответ с кодом 204 No Content
+   * @return \App\Http\Responses\BaseResponse Ответ с кодом 204 No Content
    */
-  public function logout(Request $request): BaseResponce
+  public function logout(Request $request): BaseResponse
   {
     try {
       $request->user()->currentAccessToken()->delete(); // Удаление текущего токена
       return new SuccessResponse([], 204);
     } catch (\Exception $e) {
-      return new FailResponce([], $e->getMessage());
+      return new FailResponse([], $e->getMessage());
     }
   }
 }

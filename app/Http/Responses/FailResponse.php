@@ -7,7 +7,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Класс для формирования неуспешного HTTP-ответа.
  */
-class FailResponce extends BaseResponce
+class FailResponse extends BaseResponse
 {
   public int $statusCode = Response::HTTP_BAD_REQUEST;
 
