@@ -16,6 +16,7 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth:sanc
 // Пользователь
 Route::patch('/user', [UserController::class, 'updateProfile'])->middleware('auth:sanctum');
 Route::get('/user/shows', [UserController::class, 'watchlist'])->middleware('auth:sanctum');
+// Route::get('/user/shows', [UserController::class, 'watchlist']);
 
 // Сериалы
 Route::get('/shows', [SerialController::class, 'index']);

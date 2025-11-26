@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * Абстрактный базовый класс для HTTP-ответов.
  */
-abstract class BaseResponce implements Responsable
+abstract class BaseResponse implements Responsable
 {
   /**
    * Конструктор базового ответа.
