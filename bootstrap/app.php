@@ -1,8 +1,12 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Validation\ValidationException;
+use App\Http\Responses\FailResponse;
 
 return Application::configure(basePath: dirname(__DIR__))
     ->withRouting(
@@ -14,6 +18,20 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withMiddleware(function (Middleware $middleware): void {
         //
     })
-    ->withExceptions(function (Exceptions $exceptions): void {
-        //
+    ->withExceptions(function (Exceptions $exceptions) {
+        $exceptions->renderable(function (Throwable $e) {
+            if ($e instanceof ValidationException) {
+                return new FailResponse([], $e->getMessage(), 422);
+            }
+
+            if ($e instanceof AuthorizationException) {
+                return new FailResponse([], $e->getMessage(), 403);
+            }
+
+            if ($e instanceof AuthenticationException) {
+                return new FailResponse([], $e->getMessage(), 401);
+            }
+
+            return null;
+        });
     })->create();
