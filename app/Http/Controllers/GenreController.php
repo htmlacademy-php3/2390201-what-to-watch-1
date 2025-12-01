@@ -16,7 +16,7 @@ class GenreController extends Controller
   public function index(): BaseResponse
   {
     try {
-      $data = Genre::all();
+      $data = Genre::paginate();
       return new SuccessResponse($data);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
