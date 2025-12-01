@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
+use App\Constants\UserRole;
+use App\Models\Role;
 
 /**
  * Модель пользователя
@@ -20,6 +22,7 @@ use Laravel\Sanctum\HasApiTokens;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $avatar
+ * @property int $role_id
  */
 class User extends Authenticatable
 {
@@ -42,6 +45,7 @@ class User extends Authenticatable
     'email',
     'password',
     'avatar',
+    'role_id',
   ];
 
   /**
@@ -97,5 +101,21 @@ class User extends Authenticatable
   public function watchedEpisodes()
   {
     return $this->belongsToMany(Episode::class, 'episodes_watched');
+  }
+
+  /**
+   * Получить роль пользователя.
+   */
+  public function role()
+  {
+    return $this->belongsTo(Role::class);
+  }
+
+  /**
+   * Проверяет, является ли пользователь модератором.
+   */
+  public function isModerator(): bool
+  {
+    return $this->role?->name === UserRole::MODERATOR;
   }
 }

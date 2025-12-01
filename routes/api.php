@@ -28,6 +28,9 @@ Route::post('/shows', [SerialController::class, 'request'])->middleware('auth:sa
 
 // Жанры
 Route::get('/genres', [GenreController::class, 'index']);
+Route::put('/genres/{genre}', [GenreController::class, 'update'])
+  ->middleware('auth:sanctum')
+  ->name('genres.update');
 
 // Эпизоды
 Route::get('/shows/{showId}/episodes', [EpisodeController::class, 'index']);
@@ -39,4 +42,6 @@ Route::get('/user/shows/{showId}/new-episodes', [EpisodeController::class, 'getU
 // Комментарии
 Route::get('/episode/{episodeId}/comments', [CommentController::class, 'index']);
 Route::post('/episode/{episodeId}/comments/{commentId?}', [CommentController::class, 'store'])->middleware('auth:sanctum');
-Route::delete('/comments/{commentId}', [CommentController::class, 'destroy'])->middleware('auth:sanctum');
+Route::delete('/comments/{commentId}', [CommentController::class, 'destroy'])
+  ->middleware('auth:sanctum')
+  ->name('comments.destroy');
