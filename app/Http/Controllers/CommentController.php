@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
+use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Exception;
 
 class CommentController extends Controller
@@ -33,13 +35,18 @@ class CommentController extends Controller
   }
 
   // Удаление комментария $commentId
-  public function destroy($commentId): BaseResponse
+  public function destroy(Comment $comment): BaseResponse
   {
     try {
-      $data = []; // удаляем комментарий
-      return new SuccessResponse($data);
+      if (!Gate::allows('comment-delete', $comment)) {
+        return new FailResponse([], 'Недостаточно прав для удаления комментария.', 403);
+      }
+
+      $comment->delete();
+
+      return new SuccessResponse(null, 201);
     } catch (Exception $e) {
-      return new FailResponse([], $e->getMessage());
+      return new FailResponse([], $e->getMessage(), 500);
     }
   }
 }
