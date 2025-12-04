@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель комментария
@@ -14,9 +15,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property int|null $parent_id
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read string $author_name
  */
 class Comment extends Model
 {
+  use HasFactory;
+
   /**
    * Имя таблицы в базе данных.
    *
@@ -66,5 +70,15 @@ class Comment extends Model
   public function children()
   {
     return $this->hasMany(Comment::class, 'parent_id');
+  }
+
+  /**
+   * Получить имя автора комментария или "Аноним", если пользователь не задан.
+   *
+   * @return string
+   */
+  public function getAuthorNameAttribute(): string
+  {
+    return $this->user?->name ?? 'Аноним';
   }
 }
