@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 /**
  * Модель эпизода
@@ -18,6 +19,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Episode extends Model
 {
+  use HasFactory;
+
   /**
    * Имя таблицы в базе данных.
    *

@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 /**
  * Модель сериала
@@ -14,9 +16,12 @@ use Illuminate\Database\Eloquent\Model;
  * @property \Illuminate\Support\Carbon $year
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property-read float $rating
  */
 class Serial extends Model
 {
+  use HasFactory;
+  
   /**
    * Имя таблицы в базе данных.
    *
@@ -82,5 +87,21 @@ class Serial extends Model
   public function usersWatchedEpisodes()
   {
     return $this->belongsToMany(Episode::class, 'episodes_watched');
+  }
+
+  /**
+   * Вычисляет средний рейтинг на основе голосов (поле vote в serials_votes).
+   *
+   * @return \Illuminate\Database\Eloquent\Casts\Attribute
+   */
+  protected function rating(): Attribute
+  {
+    return Attribute::get(function () {
+      if ($this->votes()->count() === 0) {
+        return 0.0;
+      }
+
+      return round((float) $this->votes()->avg('vote'), 1);
+    });
   }
 }
