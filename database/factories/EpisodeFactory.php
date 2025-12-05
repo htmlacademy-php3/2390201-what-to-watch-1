@@ -19,11 +19,12 @@ class EpisodeFactory extends Factory
   public function definition(): array
   {
     return [
-      'title' => $this->faker->sentence(3),
-      'serial_id' => Serial::factory(),
       'season_id' => Season::factory(),
       'number' => $this->faker->numberBetween(1, 20),
-      'air_date' => $this->faker->dateTimeBetween('-5 years', 'now'),
+      'title' => $this->faker->words(3, true),
+      'air_date' => $this->faker->dateTimeBetween('-5 years', '+1 year'), 
+      'created_at' => now(),
+      'updated_at' => now(),
     ];
   }
 }
