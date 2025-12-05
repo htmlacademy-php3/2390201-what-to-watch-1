@@ -90,9 +90,9 @@ class User extends Authenticatable
   /**
    * Получить сериалы, которые посмотрел пользователь.
    */
-  public function watchedSerials()
+  public function watchingSerials()
   {
-    return $this->belongsToMany(Serial::class, 'serials_watched');
+    return $this->belongsToMany(Serial::class, 'serial_watching');
   }
 
   /**
