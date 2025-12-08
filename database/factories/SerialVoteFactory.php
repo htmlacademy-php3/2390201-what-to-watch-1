@@ -21,7 +21,9 @@ class SerialVoteFactory extends Factory
     return [
       'serial_id' => Serial::factory(),
       'user_id' => User::factory(),
-      'vote' => fake()->numberBetween(1, 10),
+      'vote' => $this->faker->numberBetween(1, 5),
+      'created_at' => now(),
+      'updated_at' => now(),
     ];
   }
 }
