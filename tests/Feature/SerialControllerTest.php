@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Serial;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
 
@@ -313,23 +314,41 @@ class SerialControllerTest extends TestCase
 
     $response->assertStatus(422);
   }
-
+  
+  //Чтобы отработал этот тест, параметр QUEUE_CONNECTION=sync
   #[Test]
-  public function authenticated_user_can_request_new_serial(): void
+  public function user_can_add_serial_via_imdb_id(): void
   {
     $user = User::factory()->create();
 
     /** @var \App\Models\User $user */
     $response = $this->actingAs($user, 'sanctum')
       ->postJson('/api/shows', [
-        'title' => 'New Serial',
-        'title_original' => 'Original Title',
-        'year' => 2024,
+        'imdb' => 'tt0944947',
       ]);
 
-    $response->assertStatus(200);
+    $response->assertStatus(201);
 
-    // Проверяем, что запрос был обработан
-    // (В реальном приложении здесь может быть логика сохранения запроса)
+    $this->assertDatabaseHas('serials', [
+      'imdb_id' => 'tt0944947',
+    ]);
+  }
+
+  #[Test]
+  public function test_dispatches_job_on_valid_request(): void
+  {
+    Queue::fake();
+
+    $user = User::factory()->create();
+
+    /** @var \App\Models\User $user */
+    $response = $this->actingAs($user, 'sanctum')
+      ->postJson('/api/shows', [
+        'imdb' => 'tt0944947',
+      ]);
+
+    Queue::assertPushed(\App\Jobs\TakeAndStoreSerialFromOmdb::class, function ($job) {
+      return $job->imdbId === 'tt0944947';
+    });
   }
 }

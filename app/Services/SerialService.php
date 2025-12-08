@@ -145,7 +145,7 @@ class SerialService
       'title' => $serial->title,
       'title_original' => $serial->title_original,
       'status' => $serial->status ?? '',
-      'year' => $serial->year ? $serial->year->year : 0,
+      'year' => $serial->year ?? '',
       'rating' => $serial->rating,
       'total_seasons' => $serial->total_seasons,
       'total_episodes' => $serial->total_episodes,
