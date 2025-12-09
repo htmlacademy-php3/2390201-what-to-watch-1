@@ -7,6 +7,7 @@ use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Services\SerialService;
 use App\Models\Serial;
+use App\Jobs\TakeAndStoreSerialFromOmdb;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -114,11 +115,13 @@ class SerialController extends Controller
   }
 
   // Запрос на добавление сериала на сайт
-  public function request(Request $request): BaseResponse
+  public function addToDataBase(Request $request): BaseResponse
   {
     try {
-      $data = []; // делаем запрос о добавлении сериала на сайт
-      return new SuccessResponse($data);
+      // делаем запрос о добавлении сериала в базу данных сайта
+      $request->validate(['imdb' => 'required|string']);    //ещё валидировать по формату tt000000 и по наличию в БД, добавить cath ValidationException
+      TakeAndStoreSerialFromOmdb::dispatch($request->imdb); // добавить catch SerialNotFoundException
+      return new SuccessResponse([], 201);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
     }

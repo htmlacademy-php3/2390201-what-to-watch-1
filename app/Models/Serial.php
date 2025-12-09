@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Auth;
  * @property string $imdb_id
  * @property string $title
  * @property string $title_original
- * @property \Illuminate\Support\Carbon $year
+ * @property string $year
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  *
@@ -98,7 +98,6 @@ class Serial extends Model
   protected $casts = [
     'total_seasons' => 'int',
     'total_episodes' => 'int',
-    'year' => 'date',
   ];
 
   /**
