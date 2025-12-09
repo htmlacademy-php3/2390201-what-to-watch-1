@@ -24,7 +24,7 @@ Route::get('/shows/{id}', [SerialController::class, 'show']);
 Route::post('/user/shows/watch/{id}', [SerialController::class, 'addToWatchlist'])->middleware('auth:sanctum');
 Route::delete('/user/shows/watch/{id}', [SerialController::class, 'removeFromWatchlist'])->middleware('auth:sanctum');
 Route::post('/user/shows/{id}/vote', [SerialController::class, 'vote'])->middleware('auth:sanctum');
-Route::post('/shows', [SerialController::class, 'request'])->middleware('auth:sanctum');
+Route::post('/shows', [SerialController::class, 'addToDataBase'])->middleware('auth:sanctum');
 
 // Жанры
 Route::get('/genres', [GenreController::class, 'index']);
