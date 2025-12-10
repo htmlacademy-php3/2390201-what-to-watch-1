@@ -2,12 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Jobs\TakeAndStoreSerialFromOmdb;
 use App\Models\Serial;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Queue;
 use Tests\TestCase;
 use PHPUnit\Framework\Attributes\Test;
+use Mockery\MockInterface;
+use Romnosk\Repository\OMDBRepositoryInterface;
+
 
 class SerialControllerTest extends TestCase
 {
@@ -314,12 +318,23 @@ class SerialControllerTest extends TestCase
 
     $response->assertStatus(422);
   }
-  
-  //Чтобы отработал этот тест, параметр QUEUE_CONNECTION=sync
+
   #[Test]
   public function user_can_add_serial_via_imdb_id(): void
   {
     $user = User::factory()->create();
+
+    $this->mock(OMDBRepositoryInterface::class, function (MockInterface $mock) {
+      $mock->shouldReceive('getFilmInformation')
+        ->with('tt0944947')
+        ->andReturn([
+          'imdbID' => 'tt0944947',
+          'Title' => 'Game of Thrones',
+          'Year' => '2011',
+        ]);
+    });
+
+    Queue::fake();
 
     /** @var \App\Models\User $user */
     $response = $this->actingAs($user, 'sanctum')
@@ -329,8 +344,19 @@ class SerialControllerTest extends TestCase
 
     $response->assertStatus(201);
 
+    Queue::assertPushed(TakeAndStoreSerialFromOmdb::class, function ($job) {
+      return $job->imdbId === 'tt0944947';
+    });
+
+    // Так как очередь сфейкана, задача не выполняется автоматически.
+    // Выполняем её вручную, чтобы проверить сохранение в БД.
+    $job = new TakeAndStoreSerialFromOmdb('tt0944947');
+    $job->handle(app(OMDBRepositoryInterface::class));
+
     $this->assertDatabaseHas('serials', [
       'imdb_id' => 'tt0944947',
+      'title' => 'Game of Thrones',
+      'year' => '2011',
     ]);
   }
 
@@ -346,6 +372,7 @@ class SerialControllerTest extends TestCase
       ->postJson('/api/shows', [
         'imdb' => 'tt0944947',
       ]);
+    $response->assertStatus(201);
 
     Queue::assertPushed(\App\Jobs\TakeAndStoreSerialFromOmdb::class, function ($job) {
       return $job->imdbId === 'tt0944947';
