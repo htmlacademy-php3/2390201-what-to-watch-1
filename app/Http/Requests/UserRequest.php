@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use App\Constants\Constants;
 use App\Models\User;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -45,7 +46,26 @@ class UserRequest extends FormRequest
         'min:8',
         'confirmed',
       ],
-      'file' => 'nullable|image|max:10240'
+
+      'file' => [
+        'nullable',
+        'image',
+        'max:' . (Constants::AVATAR_SIZE_KB),
+      ],
+    ];
+  }
+
+  /**
+   * Возвращает требуемые сообщения при ошибках 422
+   *
+   * @return array Массив сообщений в формате Laravel
+   */
+  public function messages(): array
+  {
+    return [
+      'name.required' => 'Поле Имя обязательно для заполнения.',
+      'email.required' => 'Поле E-Mail адрес обязательно для заполнения.',
+      'password.required' => 'Поле Пароль обязательно для заполнения.',
     ];
   }
 

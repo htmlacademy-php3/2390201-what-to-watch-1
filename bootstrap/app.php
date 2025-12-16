@@ -21,7 +21,11 @@ return Application::configure(basePath: dirname(__DIR__))
     ->withExceptions(function (Exceptions $exceptions) {
         $exceptions->renderable(function (Throwable $e) {
             if ($e instanceof ValidationException) {
-                return new FailResponse([], $e->getMessage(), 422);
+                return new FailResponse(
+                  $e->errors(), // ошибки по полям из UserRequest
+                  'Переданные данные не корректны.',
+                  422
+                );
             }
 
             if ($e instanceof AuthorizationException) {
