@@ -15,12 +15,16 @@ class UserController extends Controller
     private readonly \App\Services\UserService $userService
   ) {}
 
-  // Получение списка просматриваемых сериалов пользователя
+  /**
+   * Получает список сериалов, добавленных пользователем в "просматриваемые".
+   */
   public function watchlist(): BaseResponse
   {
     try {
-      $data = []; // получаем список просматриваемых сериалов пользователя
-      return new SuccessResponse($data);
+      $user = Auth::user();
+      // Получаем список сериалов через сервис
+      $serials = $this->userService->getWatchlist($user);
+      return new SuccessResponse($serials);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
     }
@@ -35,11 +39,9 @@ class UserController extends Controller
       $updatedUser = $this->userService->updateProfile($user, $request->validated());
 
       return new SuccessResponse([
-        'data' => [
-          'name' => $updatedUser->name,
-          'email' => $updatedUser->email,
-          'avatar' => $updatedUser->avatar,
-        ],
+        'name' => $updatedUser->name,
+        'email' => $updatedUser->email,
+        'avatar' => $updatedUser->avatar,
       ]);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
