@@ -2,10 +2,10 @@
 
 namespace Database\Factories;
 
+use App\Constants\UserRole;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
-use App\Models\Role;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
@@ -24,10 +24,7 @@ class UserFactory extends Factory
    */
   public function definition(): array
   {
-    // Гарантируем наличие ролей
-    $userRole = Role::firstOrCreate(['name' => 'user']);
-    $modRole = Role::firstOrCreate(['name' => 'moderator']);
-
+    // Роль задаётся как строка, без использования таблицы 'roles'
     return [
       'name' => fake()->name(),
       'email' => fake()->unique()->safeEmail(),
@@ -35,7 +32,7 @@ class UserFactory extends Factory
       'password' => static::$password ??= Hash::make('password'),
       'remember_token' => Str::random(10),
       'avatar' => '',
-      'role_id' => fake()->randomElement([$userRole->id, $modRole->id]),
+      'role' => UserRole::USER,
     ];
   }
 

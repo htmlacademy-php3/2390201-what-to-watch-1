@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Constants\UserRole;
 use App\Http\Requests\UserRequest;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 
 /**
@@ -22,41 +22,35 @@ class AuthController extends Controller
    * Принимает имя, email, пароль, подтверждение пароля и опциональный файл аватара.
    * После сохранения в БД создаёт токен Sanctum и возвращает его клиенту.
    *
-   * @param \Illuminate\Http\Request $request Входящий HTTP-запрос
+   * @param \App\Http\Requests\UserRequest $request Входящий HTTP-запрос
    * @return \App\Http\Responses\BaseResponse Ответ в формате JSON
    */
   public function register(UserRequest $request): BaseResponse
   {
-    try {
-      $avatar = null;
+    $avatar = null;
 
-      // Загрузка аватара, если файл передан и валиден
-      if ($request->hasFile('file')) {
-        $file = $request->file('file');
-        if ($file->isValid() && $file->getSize() <= 10 * 1024 * 1024) {
-          $avatar = $file->store('avatars', 'public');
-        }
-      }
-
-      // Создание пользователя
-      $user = User::create([
-        'name' => $request->input('name'),
-        'email' => $request->input('email'),
-        'password' => Hash::make($request->input('password')),
-        'avatar' => $avatar,
-      ]);
-
-      $token = $user->createToken('auth-token')->plainTextToken; // Генерация токена Sanctum
-
-      return new SuccessResponse([
-        'token' => $token,
-        'user' => [
-          'name' => $user->name,
-        ],
-      ], 201);
-    } catch (\Exception $e) {
-      return new FailResponse([], $e->getMessage());
+    // Загрузка аватара, если файл передан
+    if ($request->hasFile('file')) {
+      $avatar = $request->file('file')->store('avatars', 'public');
     }
+
+    // Создание пользователя
+    $user = User::create([
+      'name' => $request->input('name'),
+      'email' => $request->input('email'),
+      'password' => Hash::make($request->input('password')),
+      'avatar' => $avatar,
+      'role' => UserRole::USER,
+    ]);
+
+    $token = $user->createToken('auth-token')->plainTextToken;
+
+    return new SuccessResponse([
+      'token' => $token,
+      'user' => [
+        'name' => $user->name,
+      ],
+    ], 201);
   }
 
   /**
@@ -71,31 +65,26 @@ class AuthController extends Controller
    */
   public function login(Request $request): BaseResponse
   {
-    try {
-      $credentials = [
-        'email' => $request->input('email'),
-        'password' => $request->input('password'),
-      ];
+    $email = $request->input('email');
+    $password = $request->input('password');
 
-      // Попытка аутентификации
-      if (!Auth::attempt($credentials)) {
-        return new FailResponse(
-          ['exception' => ['Неверное имя пользователя или пароль.']],
-          'Неверное имя пользователя или пароль.',
-          422
-        );
-      }
+    // Поиск пользователя по email
+    $user = User::where('email', $email)->first();
 
-      $user = Auth::user(); /** @var \App\Models\User $user */
-      $token = $user->createToken('auth-token')->plainTextToken;
-
-      // Успешный ответ с кодом 200 OK
-      return new SuccessResponse([
-        'token' => $token,
-      ]);
-    } catch (\Exception $e) {
-      return new FailResponse([], $e->getMessage());
+    // Проверка существования пользователя и корректности пароля
+    if (!$user || !Hash::check($password, $user->password)) {
+      return new FailResponse(
+        ['exception' => ['Неверное имя пользователя или пароль.']],
+        'Неверное имя пользователя или пароль.',
+        422
+      );
     }
+
+    $token = $user->createToken('auth-token')->plainTextToken;
+
+    return new SuccessResponse([
+      'token' => $token,
+    ]);
   }
 
   /**
@@ -109,11 +98,7 @@ class AuthController extends Controller
    */
   public function logout(Request $request): BaseResponse
   {
-    try {
-      $request->user()->currentAccessToken()->delete(); // Удаление текущего токена
-      return new SuccessResponse([], 204);
-    } catch (\Exception $e) {
-      return new FailResponse([], $e->getMessage());
-    }
+    $request->user()->currentAccessToken()->delete(); // Удаление текущего токена
+    return new SuccessResponse([], 204);
   }
 }

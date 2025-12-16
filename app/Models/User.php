@@ -8,7 +8,6 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Constants\UserRole;
-use App\Models\Role;
 
 /**
  * Модель пользователя
@@ -22,7 +21,7 @@ use App\Models\Role;
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
  * @property string|null $avatar
- * @property int $role_id
+ * @property string $role
  */
 class User extends Authenticatable
 {
@@ -45,7 +44,7 @@ class User extends Authenticatable
     'email',
     'password',
     'avatar',
-    'role_id',
+    'role',
   ];
 
   /**
@@ -104,18 +103,10 @@ class User extends Authenticatable
   }
 
   /**
-   * Получить роль пользователя.
-   */
-  public function role()
-  {
-    return $this->belongsTo(Role::class);
-  }
-
-  /**
    * Проверяет, является ли пользователь модератором.
    */
   public function isModerator(): bool
   {
-    return $this->role?->name === UserRole::MODERATOR;
+    return $this->role === UserRole::MODERATOR;
   }
 }

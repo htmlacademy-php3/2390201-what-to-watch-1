@@ -2,31 +2,47 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UserRequest;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
-use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Exception;
 
 class UserController extends Controller
 {
-  // Получение списка просматриваемых сериалов пользователя
+  public function __construct(
+    private readonly \App\Services\UserService $userService
+  ) {}
+
+  /**
+   * Получает список сериалов, добавленных пользователем в "просматриваемые".
+   */
   public function watchlist(): BaseResponse
   {
     try {
-      $data = []; // получаем список просматриваемых сериалов пользователя
-      return new SuccessResponse($data);
+      $user = Auth::user();
+      // Получаем список сериалов через сервис
+      $serials = $this->userService->getWatchlist($user);
+      return new SuccessResponse($serials);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
     }
   }
 
   // Обновление профиля пользователя
-  public function updateProfile(Request $request): BaseResponse
+  public function updateProfile(UserRequest $request): BaseResponse
   {
-    try {
-      $data = []; // обновляем профиль пользователя
-      return new SuccessResponse($data);
+    try
+    {
+      $user = Auth::user();
+      $updatedUser = $this->userService->updateProfile($user, $request->validated());
+
+      return new SuccessResponse([
+        'name' => $updatedUser->name,
+        'email' => $updatedUser->email,
+        'avatar' => $updatedUser->avatar,
+      ]);
     } catch (Exception $e) {
       return new FailResponse([], $e->getMessage());
     }

@@ -18,7 +18,6 @@ class GenreFactory extends Factory
     {
       return [
         'title' => $this->faker->unique()->word(),
-        'imdb_id' => 'tt' . $this->faker->unique()->numberBetween(1000000, 9999999),
         'created_at' => now(),
         'updated_at' => now(),
       ];

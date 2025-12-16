@@ -18,9 +18,12 @@ class FailResponse extends BaseResponse
    * @param string|null $message Описание ошибки
    * @param int $code HTTP-код состояния (по умолчанию 400)
    */
-  public function __construct($data, protected ?string $message = null, int $code = Response::HTTP_BAD_REQUEST)
+  public function __construct(
+    mixed $data = [],
+    protected ?string $message = null,
+    int $code = Response::HTTP_BAD_REQUEST)
   {
-    parent::__construct([], $code);
+    parent::__construct($data, $code);
   }
 
   /**
