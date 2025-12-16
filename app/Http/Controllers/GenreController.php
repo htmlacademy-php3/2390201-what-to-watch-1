@@ -2,46 +2,53 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\UpdateGenreRequest;
 use App\Http\Responses\BaseResponse;
 use App\Http\Responses\FailResponse;
 use App\Http\Responses\SuccessResponse;
 use App\Models\Genre;
-use Illuminate\Http\Request;
+use App\Services\GenreService;
 use Illuminate\Support\Facades\Gate;
-use Exception;
 
 class GenreController extends Controller
 {
-  // Получение списка жанров
+  /**
+   * Инициализация контроллера с добавлением экземпляра сервиса для работы с жанрами.
+   *
+   * @param GenreService $genreService
+   */
+  public function __construct(
+    private readonly \App\Services\GenreService $genreService
+  ) {}
+
+  /**
+   * Получение списка жанров.
+   *
+   * @return BaseResponse
+   */
   public function index(): BaseResponse
   {
-    try {
-      $data = Genre::paginate();
-      return new SuccessResponse($data);
-    } catch (Exception $e) {
-      return new FailResponse([], $e->getMessage());
-    }
+    $genres = $this->genreService->getAllGenres();
+    return new SuccessResponse($genres->items());
   }
 
-  // Обновление жанра
-  public function update(Request $request, Genre $genre): BaseResponse
+  /**
+   * Обновление жанра.
+   *
+   * @param UpdateGenreRequest $request
+   * @param Genre $genre
+   * @return BaseResponse
+   */
+  public function update(UpdateGenreRequest $request, Genre $genre): BaseResponse
   {
-    try {
-      // Проверка права через гейт
-      if (!Gate::allows('update-genre')) {
-        return new FailResponse([], 'Недостаточно прав для редактирования жанра.', 403);
-      }
-
-      $validated = $request->validate([
-        'title' => 'required|string|max:255',
-        'imdb_id' => 'nullable|string|max:255',
-      ]);
-
-      $genre->update($validated);
-
-      return new SuccessResponse($genre);
-    } catch (Exception $e) {
-      return new FailResponse([], $e->getMessage(), 500);
+    // Проверка права через Gate (возвращает true/false)
+    if (!Gate::allows('update-genre')) {
+      return new FailResponse([], 'Неавторизованное действие.', 403);
     }
+
+    $validated = $request->validated();
+    $updatedGenre = $this->genreService->updateGenre($genre, $validated);
+
+    return new SuccessResponse([$updatedGenre]);
   }
 }

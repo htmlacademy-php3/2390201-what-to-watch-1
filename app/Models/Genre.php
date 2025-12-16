@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
  * Модель жанра
  *
  * @property int $id
- * @property string $imdb_id
  * @property string $title
  * @property \Illuminate\Support\Carbon|null $created_at
  * @property \Illuminate\Support\Carbon|null $updated_at
@@ -31,7 +30,6 @@ class Genre extends Model
    * @var array<int, string>
    */
   protected $fillable = [
-    'imdb_id',
     'title',
   ];
 

@@ -28,7 +28,7 @@ Route::post('/shows', [SerialController::class, 'addToDataBase'])->middleware('a
 
 // Жанры
 Route::get('/genres', [GenreController::class, 'index']);
-Route::put('/genres/{genre}', [GenreController::class, 'update'])
+Route::patch('/genres/{genre}', [GenreController::class, 'update'])
   ->middleware('auth:sanctum')
   ->name('genres.update');
 

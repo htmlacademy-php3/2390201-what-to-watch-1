@@ -22,7 +22,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->renderable(function (Throwable $e) {
             if ($e instanceof ValidationException) {
                 return new FailResponse(
-                  $e->errors(), // ошибки по полям из UserRequest
+                  $e->errors(), // ошибки по полям из request
                   'Переданные данные не корректны.',
                   422
                 );
@@ -33,7 +33,7 @@ return Application::configure(basePath: dirname(__DIR__))
             }
 
             if ($e instanceof AuthenticationException) {
-                return new FailResponse([], $e->getMessage(), 401);
+                return new FailResponse([], 'Запрос требует аутентификации.', 401);
             }
 
             return null;
